@@ -1,0 +1,47 @@
+# ===========================
+# 내부 문서 (비공개)
+# ===========================
+CLAUDE.md
+docs/
+
+# ===========================
+# Backend (Java / Gradle)
+# ===========================
+backend/build/
+backend/.gradle/
+backend/out/
+backend/*.class
+backend/*.jar
+backend/*.war
+
+# QueryDSL 생성 파일
+backend/src/main/generated/
+
+# Spring Boot 로컬 설정
+backend/src/main/resources/application-local.yaml
+backend/src/main/resources/application-local.yml
+
+# ===========================
+# Frontend (Node / Vite)
+# ===========================
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+frontend/.env.production
+
+# ===========================
+# IDE / Editor
+# ===========================
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+
+# ===========================
+# OS
+# ===========================
+.DS_Store
+desktop.ini
+Thumbs.db
