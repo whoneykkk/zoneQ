@@ -37,6 +37,9 @@ public enum ErrorCode {
     // Noise
     NOISE_MEASUREMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "소음 측정 데이터를 찾을 수 없습니다."),
 
+    // Grade
+    GRADE_NOT_FOUND(HttpStatus.NOT_FOUND, "등급 정보를 찾을 수 없습니다."),
+
     // Message
     MESSAGE_NOT_FOUND(HttpStatus.NOT_FOUND, "쪽지를 찾을 수 없습니다."),
     REPLY_NOT_ALLOWED(HttpStatus.FORBIDDEN, "익명 쪽지에는 답장할 수 없습니다."),

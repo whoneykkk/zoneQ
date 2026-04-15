@@ -1,5 +1,6 @@
 package com.zoneq.domain.session.service;
 
+import com.zoneq.domain.grade.service.GradeService;
 import com.zoneq.domain.seat.domain.Seat;
 import com.zoneq.domain.seat.domain.SeatStatus;
 import com.zoneq.domain.seat.dto.SeatAssignResponse;
@@ -21,13 +22,13 @@ public class SessionService {
     private final UserRepository userRepository;
     private final SeatRepository seatRepository;
     private final SessionRepository sessionRepository;
+    private final GradeService gradeService;
 
     @Transactional
     public SeatAssignResponse assign(String email) {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new BusinessException(ErrorCode.USER_NOT_FOUND));
 
-        // 이미 좌석 배정된 경우
         if (seatRepository.findByUserId(user.getId()).isPresent()) {
             throw new BusinessException(ErrorCode.ALREADY_HAS_SEAT);
         }
@@ -57,6 +58,8 @@ public class SessionService {
         Seat seat = seatRepository.findByUserId(user.getId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.SEAT_NOT_FOUND));
         seat.release();
+
+        gradeService.recalculate(user.getId());
     }
 
     private String resolveZone(String grade) {

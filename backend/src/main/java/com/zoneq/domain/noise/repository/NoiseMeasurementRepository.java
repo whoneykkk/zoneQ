@@ -9,4 +9,5 @@ import java.util.List;
 public interface NoiseMeasurementRepository extends JpaRepository<NoiseMeasurement, Long> {
     List<NoiseMeasurement> findBySessionIdAndSeatIdAndMeasuredAtAfter(
             Long sessionId, Long seatId, LocalDateTime after);
+    List<NoiseMeasurement> findBySessionIdIn(List<Long> sessionIds);
 }
