@@ -13,4 +13,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u.grade, COUNT(u) FROM User u GROUP BY u.grade")
     List<Object[]> countByGrade();
+
+    @Query("SELECT u.grade, COUNT(u) FROM User u WHERE u.role = com.zoneq.domain.user.domain.UserRole.USER GROUP BY u.grade")
+    List<Object[]> countByGradeForUsers();
 }
