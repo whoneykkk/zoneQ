@@ -41,23 +41,24 @@ class NoticeServiceTest {
 
     @Test
     void getList_withPinnedTrue_callsFindAllPinned() {
-        Pageable pageable = PageRequest.of(0, 10, Sort.by("createdAt").descending());
-        when(noticeRepository.findAllPinned(any(Pageable.class))).thenReturn(Page.empty());
+        PageRequest unsorted = PageRequest.of(0, 10);
+        when(noticeRepository.findAllPinned(unsorted)).thenReturn(Page.empty());
 
         NoticeListResponse result = noticeService.getList(true, PageRequest.of(0, 10));
 
-        verify(noticeRepository).findAllPinned(any(Pageable.class));
+        verify(noticeRepository).findAllPinned(unsorted);
         verify(noticeRepository, never()).findAllSorted(any());
         assertThat(result.notices()).isEmpty();
     }
 
     @Test
     void getList_withPinnedNull_callsFindAllSorted() {
-        when(noticeRepository.findAllSorted(any(Pageable.class))).thenReturn(Page.empty());
+        PageRequest unsorted = PageRequest.of(0, 10);
+        when(noticeRepository.findAllSorted(unsorted)).thenReturn(Page.empty());
 
         noticeService.getList(null, PageRequest.of(0, 10));
 
-        verify(noticeRepository).findAllSorted(any(Pageable.class));
+        verify(noticeRepository).findAllSorted(unsorted);
         verify(noticeRepository, never()).findAllPinned(any());
     }
 
@@ -133,5 +134,26 @@ class NoticeServiceTest {
         assertThatThrownBy(() -> noticeService.delete(999L))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining(ErrorCode.NOTICE_NOT_FOUND.getMessage());
+    }
+
+    @Test
+    void getList_withPinnedFalse_callsFindAllSorted() {
+        PageRequest unsorted = PageRequest.of(0, 10);
+        when(noticeRepository.findAllSorted(unsorted)).thenReturn(Page.empty());
+
+        noticeService.getList(false, PageRequest.of(0, 10));
+
+        verify(noticeRepository).findAllSorted(unsorted);
+        verify(noticeRepository, never()).findAllPinned(any());
+    }
+
+    @Test
+    void create_throwsUserNotFound_whenAdminMissing() {
+        when(userRepository.findByEmail("no@test.com")).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> noticeService.create("no@test.com",
+                new NoticeCreateRequest("제목", "본문", false)))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining(ErrorCode.USER_NOT_FOUND.getMessage());
     }
 }

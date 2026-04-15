@@ -8,7 +8,9 @@ import com.zoneq.domain.user.repository.UserRepository;
 import com.zoneq.global.exception.BusinessException;
 import com.zoneq.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,15 +23,10 @@ public class NoticeService {
 
     @Transactional(readOnly = true)
     public NoticeListResponse getList(Boolean pinned, Pageable pageable) {
-        Sort sort = Boolean.TRUE.equals(pinned)
-                ? Sort.by("createdAt").descending()
-                : Sort.by(Sort.Order.desc("pinned"), Sort.Order.desc("createdAt"));
-        Pageable sortedPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize(), sort);
-
+        Pageable unsorted = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
         Page<Notice> page = Boolean.TRUE.equals(pinned)
-                ? noticeRepository.findAllPinned(sortedPageable)
-                : noticeRepository.findAllSorted(sortedPageable);
-
+                ? noticeRepository.findAllPinned(unsorted)
+                : noticeRepository.findAllSorted(unsorted);
         return NoticeListResponse.from(page.map(NoticeResponse::from));
     }
 
