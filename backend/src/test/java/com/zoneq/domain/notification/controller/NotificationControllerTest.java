@@ -14,6 +14,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
+import static org.assertj.core.api.Assertions.*;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -46,6 +47,7 @@ class NotificationControllerTest {
                 .andReturn();
         userToken = objectMapper.readTree(r.getResponse().getContentAsString())
                 .at("/data/accessToken").asText();
+        assertThat(userToken).isNotEmpty();
 
         // Insert a notification directly into DB for this user
         Long userId = jdbcTemplate.queryForObject(
@@ -96,5 +98,14 @@ class NotificationControllerTest {
     void markAsRead_returns401_withoutToken() throws Exception {
         mockMvc().perform(patch("/api/notifications/" + notificationId + "/read"))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @Order(6)
+    void getMyNotifications_afterMarkAsRead_unreadCountIsZero() throws Exception {
+        mockMvc().perform(get("/api/notifications/me")
+                        .header("Authorization", "Bearer " + userToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.data.unreadCount").value(0));
     }
 }

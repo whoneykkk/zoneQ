@@ -45,6 +45,6 @@ public class NotificationController {
             @AuthenticationPrincipal UserDetails userDetails,
             @Parameter(description = "알림 ID") @PathVariable Long id) {
         notificationService.markAsRead(userDetails.getUsername(), id);
-        return ApiResponse.ok(null);
+        return ApiResponse.ok();
     }
 }
