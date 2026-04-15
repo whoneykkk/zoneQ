@@ -1,17 +1,17 @@
 package com.zoneq.domain.notice.domain;
 
 import com.zoneq.domain.user.domain.User;
+import com.zoneq.global.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "notices")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Notice {
+public class Notice extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,16 +30,12 @@ public class Notice {
     @Column(name = "is_pinned", nullable = false)
     private boolean pinned;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
     public static Notice create(User admin, String title, String body, boolean pinned) {
         Notice n = new Notice();
         n.admin = admin;
         n.title = title;
         n.body = body;
         n.pinned = pinned;
-        n.createdAt = LocalDateTime.now();
         return n;
     }
 
