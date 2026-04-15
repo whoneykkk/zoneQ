@@ -3,6 +3,7 @@ package com.zoneq.domain.grade.service;
 import com.zoneq.domain.grade.domain.GradeHistory;
 import com.zoneq.domain.grade.dto.GradeDistributionResponse;
 import com.zoneq.domain.grade.dto.GradeScoreResponse;
+import com.zoneq.domain.grade.event.GradeUpdatedEvent;
 import com.zoneq.domain.grade.repository.GradeHistoryRepository;
 import com.zoneq.domain.noise.domain.NoiseMeasurement;
 import com.zoneq.domain.noise.repository.NoiseMeasurementRepository;
@@ -35,6 +36,7 @@ class GradeServiceTest {
     @Mock private SessionRepository sessionRepository;
     @Mock private NoiseMeasurementRepository noiseMeasurementRepository;
     @Mock private GradeHistoryRepository gradeHistoryRepository;
+    @Mock private org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private GradeService gradeService;
@@ -96,6 +98,7 @@ class GradeServiceTest {
         // mockUser.grade가 null이었으므로 변경 발생 → GradeHistory 저장
         verify(gradeHistoryRepository).save(any(GradeHistory.class));
         assertThat(mockUser.getGrade()).isEqualTo("S");
+        verify(eventPublisher).publishEvent(new GradeUpdatedEvent(mockUser.getId(), "S"));
     }
 
     @Test
@@ -119,6 +122,7 @@ class GradeServiceTest {
         gradeService.recalculate(1L);
 
         verifyNoInteractions(gradeHistoryRepository);
+        verify(eventPublisher, never()).publishEvent(any());
     }
 
     // ── getMyGrade ───────────────────────────────────────────────────

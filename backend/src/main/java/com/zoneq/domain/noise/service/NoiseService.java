@@ -3,6 +3,7 @@ package com.zoneq.domain.noise.service;
 import com.zoneq.domain.noise.domain.CalibrationMap;
 import com.zoneq.domain.noise.domain.NoiseMeasurement;
 import com.zoneq.domain.noise.dto.*;
+import com.zoneq.domain.noise.event.NoiseWarningEvent;
 import com.zoneq.domain.noise.repository.CalibrationMapRepository;
 import com.zoneq.domain.noise.repository.NoiseMeasurementRepository;
 import com.zoneq.domain.seat.domain.Seat;
@@ -15,6 +16,7 @@ import com.zoneq.global.exception.BusinessException;
 import com.zoneq.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,7 @@ public class NoiseService {
     private final NoiseMeasurementRepository noiseMeasurementRepository;
     private final CalibrationMapRepository calibrationMapRepository;
     private final NoiseAttributionService noiseAttributionService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Async("noiseAsyncExecutor")
     @Transactional
@@ -55,6 +58,10 @@ public class NoiseService {
                 request.measuredAt()
         );
         noiseMeasurementRepository.save(measurement);
+
+        if (measurement.getLeqDb() >= 60) {
+            eventPublisher.publishEvent(new NoiseWarningEvent(user.getId(), measurement.getLeqDb()));
+        }
 
         noiseAttributionService.attribute(seat.getId(), request.leqDb())
                 .ifPresent(sourceSeatId ->

@@ -2,6 +2,7 @@ package com.zoneq.domain.grade.service;
 
 import com.zoneq.domain.grade.domain.GradeHistory;
 import com.zoneq.domain.grade.dto.*;
+import com.zoneq.domain.grade.event.GradeUpdatedEvent;
 import com.zoneq.domain.grade.repository.GradeHistoryRepository;
 import com.zoneq.domain.noise.domain.NoiseMeasurement;
 import com.zoneq.domain.noise.repository.NoiseMeasurementRepository;
@@ -12,6 +13,7 @@ import com.zoneq.domain.user.repository.UserRepository;
 import com.zoneq.global.exception.BusinessException;
 import com.zoneq.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,7 @@ public class GradeService {
     private final SessionRepository sessionRepository;
     private final NoiseMeasurementRepository noiseMeasurementRepository;
     private final GradeHistoryRepository gradeHistoryRepository;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public void recalculate(Long userId) {
@@ -48,6 +51,7 @@ public class GradeService {
         if (!result.grade().equals(user.getGrade())) {
             user.updateGrade(result.grade());
             gradeHistoryRepository.save(GradeHistory.of(user, result.grade()));
+            eventPublisher.publishEvent(new GradeUpdatedEvent(user.getId(), result.grade()));
         }
     }
 

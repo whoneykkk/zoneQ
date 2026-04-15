@@ -3,6 +3,7 @@ package com.zoneq.domain.noise.service;
 import com.zoneq.domain.noise.domain.NoiseCategory;
 import com.zoneq.domain.noise.domain.NoiseMeasurement;
 import com.zoneq.domain.noise.dto.CalibrationEntryRequest;
+import com.zoneq.domain.noise.event.NoiseWarningEvent;
 import com.zoneq.domain.noise.dto.CalibrationRequest;
 import com.zoneq.domain.noise.dto.NoiseMeasurementRequest;
 import com.zoneq.domain.noise.dto.NoiseClassificationResponse;
@@ -47,6 +48,7 @@ class NoiseServiceTest {
     @Mock private NoiseMeasurementRepository noiseMeasurementRepository;
     @Mock private CalibrationMapRepository calibrationMapRepository;
     @Mock private NoiseAttributionService noiseAttributionService;
+    @Mock private org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private NoiseService noiseService;
@@ -85,6 +87,7 @@ class NoiseServiceTest {
         ArgumentCaptor<NoiseMeasurement> captor = ArgumentCaptor.forClass(NoiseMeasurement.class);
         verify(noiseMeasurementRepository).save(captor.capture());
         assertThat(captor.getValue().getIsHabitual()).isFalse();
+        verify(eventPublisher, never()).publishEvent(any(NoiseWarningEvent.class));
     }
 
     @Test
@@ -107,6 +110,25 @@ class NoiseServiceTest {
         ArgumentCaptor<NoiseMeasurement> captor = ArgumentCaptor.forClass(NoiseMeasurement.class);
         verify(noiseMeasurementRepository).save(captor.capture());
         assertThat(captor.getValue().getIsHabitual()).isTrue();
+        verify(eventPublisher, never()).publishEvent(any(NoiseWarningEvent.class));
+    }
+
+    @Test
+    void saveMeasurement_publishesNoiseWarningEvent_whenLeqDbAtOrAbove60() {
+        NoiseMeasurementRequest req = new NoiseMeasurementRequest(
+                1L, 60.0, 3, 30, NoiseCategory.TALK, LocalDateTime.now());
+
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(mockUser));
+        when(sessionRepository.findByUserIdAndEndedAtIsNull(any())).thenReturn(Optional.of(mockSession));
+        when(seatRepository.findById(1L)).thenReturn(Optional.of(mockSeat));
+        when(noiseMeasurementRepository.findBySessionIdAndSeatIdAndMeasuredAtAfter(
+                any(), any(), any())).thenReturn(List.of());
+        when(noiseMeasurementRepository.save(any())).thenAnswer(i -> i.getArgument(0));
+        when(noiseAttributionService.attribute(any(), anyDouble())).thenReturn(Optional.empty());
+
+        noiseService.saveMeasurement("test@test.com", req);
+
+        verify(eventPublisher).publishEvent(any(NoiseWarningEvent.class));
     }
 
     @Test

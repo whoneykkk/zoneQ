@@ -4,6 +4,7 @@ import com.zoneq.domain.grade.service.GradeService;
 import com.zoneq.domain.seat.domain.Seat;
 import com.zoneq.domain.seat.domain.SeatStatus;
 import com.zoneq.domain.seat.dto.SeatAssignResponse;
+import com.zoneq.domain.seat.event.SeatAssignedEvent;
 import com.zoneq.domain.seat.repository.SeatRepository;
 import com.zoneq.domain.session.domain.Session;
 import com.zoneq.domain.session.repository.SessionRepository;
@@ -12,6 +13,7 @@ import com.zoneq.domain.user.repository.UserRepository;
 import com.zoneq.global.exception.BusinessException;
 import com.zoneq.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,6 +25,7 @@ public class SessionService {
     private final SeatRepository seatRepository;
     private final SessionRepository sessionRepository;
     private final GradeService gradeService;
+    private final ApplicationEventPublisher eventPublisher;
 
     @Transactional
     public SeatAssignResponse assign(String email) {
@@ -41,6 +44,8 @@ public class SessionService {
 
         seat.assign(user);
         Session session = sessionRepository.save(Session.start(user, seat));
+
+        eventPublisher.publishEvent(new SeatAssignedEvent(user.getId(), seat.getZone(), seat.getSeatNumber()));
 
         return SeatAssignResponse.of(seat, session.getId());
     }
