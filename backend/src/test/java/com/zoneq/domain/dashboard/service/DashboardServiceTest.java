@@ -29,7 +29,6 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@MockitoSettings(strictness = Strictness.LENIENT)
 class DashboardServiceTest {
 
     @Mock private SeatRepository seatRepository;
@@ -50,12 +49,12 @@ class DashboardServiceTest {
 
         occupiedSeat = spy(Seat.of("A", 3));
         doReturn(1L).when(occupiedSeat).getId();
-        doReturn(SeatStatus.OCCUPIED).when(occupiedSeat).getStatus();
-        doReturn(mockUser).when(occupiedSeat).getUser();
     }
 
     @Test
     void getRealtimeData_returnsOccupiedSeatsWithLeqDb() {
+        doReturn(mockUser).when(occupiedSeat).getUser();
+
         NoiseMeasurement measurement = mock(NoiseMeasurement.class);
         when(measurement.getSeat()).thenReturn(occupiedSeat);
         when(measurement.getLeqDb()).thenReturn(52.3);
@@ -73,6 +72,8 @@ class DashboardServiceTest {
 
     @Test
     void getRealtimeData_returnsNullLeqDb_whenNoMeasurement() {
+        doReturn(mockUser).when(occupiedSeat).getUser();
+
         when(seatRepository.findByStatus(SeatStatus.OCCUPIED)).thenReturn(List.of(occupiedSeat));
         when(noiseMeasurementRepository.findLatestBySeatIds(List.of(1L))).thenReturn(List.of());
 
@@ -83,6 +84,7 @@ class DashboardServiceTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void getRealtimeData_returnsEmptyList_whenNoOccupiedSeats() {
         when(seatRepository.findByStatus(SeatStatus.OCCUPIED)).thenReturn(List.of());
 
@@ -94,8 +96,9 @@ class DashboardServiceTest {
 
     @Test
     void getStats_aggregatesCorrectly() {
+        doReturn(SeatStatus.OCCUPIED).when(occupiedSeat).getStatus();
+
         Seat availableSeat = spy(Seat.of("B", 1));
-        doReturn(2L).when(availableSeat).getId();
         doReturn(SeatStatus.AVAILABLE).when(availableSeat).getStatus();
 
         User adminUser = User.create("관리자", "admin@test.com", "pw", UserRole.ADMIN);
@@ -121,6 +124,7 @@ class DashboardServiceTest {
     }
 
     @Test
+    @MockitoSettings(strictness = Strictness.LENIENT)
     void broadcastRealtime_delegatesToRegistry() {
         when(seatRepository.findByStatus(SeatStatus.OCCUPIED)).thenReturn(List.of());
 

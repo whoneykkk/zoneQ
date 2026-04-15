@@ -36,6 +36,7 @@ public class DashboardService {
     private final NotificationRepository notificationRepository;
     private final SseEmitterRegistry registry;
 
+    @Transactional(readOnly = true)
     public SseEmitter subscribe() {
         SseEmitter emitter = new SseEmitter(30 * 60 * 1000L);
         String id = UUID.randomUUID().toString();
@@ -73,7 +74,7 @@ public class DashboardService {
                         seat.getZone(),
                         seat.getSeatNumber(),
                         latestLeqBySeatId.get(seat.getId()),
-                        seat.getUser().getId()
+                        seat.getUser() != null ? seat.getUser().getId() : null
                 ))
                 .toList();
     }
@@ -125,6 +126,7 @@ public class DashboardService {
         return new DashboardStatsResponse(totalSeats, occupiedCount, avgLeqDb, warningCount, dist);
     }
 
+    @Transactional(readOnly = true)
     public void broadcastRealtime() {
         registry.broadcast(getRealtimeData());
     }
