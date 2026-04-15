@@ -34,18 +34,16 @@ class DashboardControllerTest {
 
     private final ObjectMapper objectMapper = new ObjectMapper()
             .registerModule(new JavaTimeModule());
+    private MockMvc mockMvc;
     private String adminToken;
     private String userToken;
 
-    private MockMvc mockMvc() {
-        return MockMvcBuilders.webAppContextSetup(context)
-                .apply(springSecurity()).build();
-    }
-
     @BeforeAll
     void setUp() throws Exception {
+        mockMvc = MockMvcBuilders.webAppContextSetup(context).apply(springSecurity()).build();
+
         // USER 가입
-        MvcResult r1 = mockMvc().perform(post("/api/auth/signup")
+        MvcResult r1 = mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new SignupRequest("대시유저", "dash_user@test.com", "password123!"))))
@@ -55,7 +53,7 @@ class DashboardControllerTest {
         assertThat(userToken).isNotEmpty();
 
         // ADMIN 가입 후 role 승격
-        MvcResult r2 = mockMvc().perform(post("/api/auth/signup")
+        MvcResult r2 = mockMvc.perform(post("/api/auth/signup")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(
                                 new SignupRequest("대시관리자", "dash_admin@test.com", "password123!"))))
@@ -69,7 +67,7 @@ class DashboardControllerTest {
     @Test
     @Order(1)
     void getStats_returns200_withAdminToken() throws Exception {
-        mockMvc().perform(get("/api/dashboard/stats")
+        mockMvc.perform(get("/api/dashboard/stats")
                         .header("Authorization", "Bearer " + adminToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.totalSeats").isNumber())
@@ -81,7 +79,7 @@ class DashboardControllerTest {
     @Test
     @Order(2)
     void getStats_returns403_withUserToken() throws Exception {
-        mockMvc().perform(get("/api/dashboard/stats")
+        mockMvc.perform(get("/api/dashboard/stats")
                         .header("Authorization", "Bearer " + userToken))
                 .andExpect(status().isForbidden());
     }
@@ -89,25 +87,24 @@ class DashboardControllerTest {
     @Test
     @Order(3)
     void getStats_returns401_withoutToken() throws Exception {
-        mockMvc().perform(get("/api/dashboard/stats"))
+        mockMvc.perform(get("/api/dashboard/stats"))
                 .andExpect(status().isUnauthorized());
     }
 
     @Test
     @Order(4)
     void getRealtime_returns200_withAdminToken() throws Exception {
-        MvcResult result = mockMvc().perform(get("/api/dashboard/realtime")
+        mockMvc.perform(get("/api/dashboard/realtime")
                         .header("Authorization", "Bearer " + adminToken)
                         .accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isOk())
-                .andExpect(header().string("Content-Type", org.hamcrest.Matchers.containsString("text/event-stream")))
-                .andReturn();
+                .andExpect(header().string("Content-Type", org.hamcrest.Matchers.containsString("text/event-stream")));
     }
 
     @Test
     @Order(5)
     void getRealtime_returns403_withUserToken() throws Exception {
-        mockMvc().perform(get("/api/dashboard/realtime")
+        mockMvc.perform(get("/api/dashboard/realtime")
                         .header("Authorization", "Bearer " + userToken)
                         .accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isForbidden());
@@ -116,7 +113,7 @@ class DashboardControllerTest {
     @Test
     @Order(6)
     void getRealtime_returns401_withoutToken() throws Exception {
-        mockMvc().perform(get("/api/dashboard/realtime")
+        mockMvc.perform(get("/api/dashboard/realtime")
                         .accept(MediaType.TEXT_EVENT_STREAM))
                 .andExpect(status().isUnauthorized());
     }
