@@ -47,6 +47,7 @@ class NoiseServiceTest {
     @Mock private NoiseMeasurementRepository noiseMeasurementRepository;
     @Mock private CalibrationMapRepository calibrationMapRepository;
     @Mock private NoiseAttributionService noiseAttributionService;
+    @Mock private org.springframework.context.ApplicationEventPublisher eventPublisher;
 
     @InjectMocks
     private NoiseService noiseService;
