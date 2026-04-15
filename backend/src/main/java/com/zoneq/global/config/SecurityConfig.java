@@ -64,6 +64,8 @@ public class SecurityConfig {
                         // ADMIN 전용
                         .requestMatchers("/api/dashboard/**").hasRole("ADMIN")
                         .requestMatchers("/api/noise/calibration").hasRole("ADMIN")
+                        .requestMatchers("/api/grades/users/**").hasRole("ADMIN")
+                        .requestMatchers("/api/grades/distribution").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.POST, "/api/notices").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/notices/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE, "/api/notices/**").hasRole("ADMIN")
