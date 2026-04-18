@@ -24,8 +24,18 @@ describe('authStore', () => {
     expect(state.isInitializing).toBe(false)
   })
 
-  it('starts with isInitializing true', () => {
-    useAuthStore.setState({ isInitializing: true })
+  it('initializes with correct default state', () => {
+    useAuthStore.setState(useAuthStore.getInitialState())
+    const state = useAuthStore.getState()
+    expect(state.isInitializing).toBe(true)
+    expect(state.accessToken).toBeNull()
+    expect(state.user).toBeNull()
+  })
+
+  it('sets isInitializing flag', () => {
+    useAuthStore.getState().setInitializing(false)
+    expect(useAuthStore.getState().isInitializing).toBe(false)
+    useAuthStore.getState().setInitializing(true)
     expect(useAuthStore.getState().isInitializing).toBe(true)
   })
 })
