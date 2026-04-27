@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuthStore } from './stores/authStore'
 import { fetchRefresh } from './api/auth'
+import { fetchProfileMe } from './api/profile'
 import PrivateRoute from './components/layout/PrivateRoute'
 import LoginPage from './pages/auth/LoginPage'
 import HomePage from './pages/home/HomePage'
@@ -25,11 +26,16 @@ const router = createBrowserRouter([
 ])
 
 function AuthInitializer() {
-  const { setAuth, clearAuth } = useAuthStore()
+  const { refreshToken, setAuth, setUser, clearAuth } = useAuthStore()
 
   useEffect(() => {
-    fetchRefresh()
-      .then(({ accessToken, user }) => setAuth(accessToken, user))
+    if (!refreshToken) { clearAuth(); return }
+    fetchRefresh(refreshToken)
+      .then(({ accessToken, refreshToken: newRefresh }) => {
+        setAuth(accessToken, null, newRefresh)
+        return fetchProfileMe()
+      })
+      .then((profile) => setUser(profile))
       .catch(() => clearAuth())
   }, [])
 
