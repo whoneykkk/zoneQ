@@ -11,6 +11,9 @@ import ProfilePage from './pages/profile/ProfilePage'
 import MessagesPage from './pages/messages/MessagesPage'
 import MessageDetailPage from './pages/messages/MessageDetailPage'
 import ComposePage from './pages/messages/ComposePage'
+import NoticesPage from './pages/notices/NoticesPage'
+import NoticeDetailPage from './pages/notices/NoticeDetailPage'
+import NotificationsPage from './pages/notifications/NotificationsPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -26,6 +29,9 @@ const router = createBrowserRouter([
       { path: '/messages', element: <MessagesPage /> },
       { path: '/messages/:id', element: <MessageDetailPage /> },
       { path: '/messages/compose', element: <ComposePage /> },
+      { path: '/notices', element: <NoticesPage /> },
+      { path: '/notices/:id', element: <NoticeDetailPage /> },
+      { path: '/notifications', element: <NotificationsPage /> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
