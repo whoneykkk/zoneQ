@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
 import { fetchLogin } from '../../api/auth'
+import { fetchProfileMe } from '../../api/profile'
 import { ZQ } from '../../utils/colors'
 
 export default function LoginPage() {
@@ -9,7 +10,7 @@ export default function LoginPage() {
   const [pw, setPw] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const { setAuth } = useAuthStore()
+  const { setAuth, setUser } = useAuthStore()
   const navigate = useNavigate()
   const ok = email.length > 0 && pw.length > 0
 
@@ -18,8 +19,10 @@ export default function LoginPage() {
     setLoading(true)
     setError('')
     try {
-      const { accessToken, user } = await fetchLogin(email, pw)
-      setAuth(accessToken, user)
+      const { accessToken, refreshToken } = await fetchLogin(email, pw)
+      setAuth(accessToken, null, refreshToken)
+      const profile = await fetchProfileMe()
+      setUser(profile)
       navigate('/')
     } catch (e) {
       setError(e.response?.data?.message || '로그인에 실패했습니다.')

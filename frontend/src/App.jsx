@@ -3,10 +3,14 @@ import { createBrowserRouter, RouterProvider, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useAuthStore } from './stores/authStore'
 import { fetchRefresh } from './api/auth'
+import { fetchProfileMe } from './api/profile'
 import PrivateRoute from './components/layout/PrivateRoute'
 import LoginPage from './pages/auth/LoginPage'
 import HomePage from './pages/home/HomePage'
 import ProfilePage from './pages/profile/ProfilePage'
+import MessagesPage from './pages/messages/MessagesPage'
+import MessageDetailPage from './pages/messages/MessageDetailPage'
+import ComposePage from './pages/messages/ComposePage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -19,17 +23,25 @@ const router = createBrowserRouter([
     children: [
       { path: '/', element: <HomePage /> },
       { path: '/profile', element: <ProfilePage /> },
+      { path: '/messages', element: <MessagesPage /> },
+      { path: '/messages/:id', element: <MessageDetailPage /> },
+      { path: '/messages/compose', element: <ComposePage /> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
 ])
 
 function AuthInitializer() {
-  const { setAuth, clearAuth } = useAuthStore()
+  const { refreshToken, setAuth, setUser, clearAuth } = useAuthStore()
 
   useEffect(() => {
-    fetchRefresh()
-      .then(({ accessToken, user }) => setAuth(accessToken, user))
+    if (!refreshToken) { clearAuth(); return }
+    fetchRefresh(refreshToken)
+      .then(({ accessToken, refreshToken: newRefresh }) => {
+        setAuth(accessToken, null, newRefresh)
+        return fetchProfileMe()
+      })
+      .then((profile) => setUser(profile))
       .catch(() => clearAuth())
   }, [])
 

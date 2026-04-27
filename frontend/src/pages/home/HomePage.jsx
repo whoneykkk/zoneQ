@@ -2,6 +2,8 @@ import { useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useAuthStore } from '../../stores/authStore'
 import { fetchSeats } from '../../api/seats'
+import { fetchMessagesInbox } from '../../api/messages'
+import { fetchNotificationsMe } from '../../api/notifications'
 import HomeHeader from '../../components/layout/HomeHeader'
 import SeatMap from '../../components/ui/SeatMap'
 import { ZQ } from '../../utils/colors'
@@ -33,8 +35,20 @@ export default function HomePage() {
     select: normalizeSeatData,
   })
 
+  const { data: messages } = useQuery({
+    queryKey: ['messages', 'inbox'],
+    queryFn: fetchMessagesInbox,
+  })
+
+  const { data: notifications } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: fetchNotificationsMe,
+  })
+
   const seats = seatData || MOCK_SEATS
   const mySeat = user?.seat ? { zone: user.seat.zone, seatNumber: user.seat.seatNumber } : null
+  const hasUnreadMessages = Array.isArray(messages) ? messages.some((m) => !m.isRead) : false
+  const hasUnreadNotifications = notifications?.unreadCount > 0
 
   const handleSeatClick = (zone, seatNumber) => {
     navigate(`/messages/compose?zone=${zone}&seatNumber=${seatNumber}`)
@@ -47,8 +61,8 @@ export default function HomePage() {
         onGoProfile={() => navigate('/profile')}
         onGoMessages={() => navigate('/messages')}
         onGoNotifications={() => navigate('/notifications')}
-        hasUnreadMessages={false}
-        hasUnreadNotifications={false}
+        hasUnreadMessages={hasUnreadMessages}
+        hasUnreadNotifications={hasUnreadNotifications}
       />
 
       <div style={{ padding: '0 16px' }}>
