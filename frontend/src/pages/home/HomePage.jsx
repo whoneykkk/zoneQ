@@ -61,6 +61,8 @@ export default function HomePage() {
         onGoProfile={() => navigate('/profile')}
         onGoMessages={() => navigate('/messages')}
         onGoNotifications={() => navigate('/notifications')}
+        onGoDashboard={() => navigate('/dashboard')}
+        isAdmin={user?.role === 'ADMIN'}
         hasUnreadMessages={hasUnreadMessages}
         hasUnreadNotifications={hasUnreadNotifications}
       />

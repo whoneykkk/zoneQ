@@ -1,6 +1,6 @@
 import { ZQ } from '../../utils/colors'
 
-export default function HomeHeader({ userName, onGoProfile, onGoMessages, onGoNotifications, hasUnreadMessages = false, hasUnreadNotifications = false }) {
+export default function HomeHeader({ userName, onGoProfile, onGoMessages, onGoNotifications, onGoDashboard, isAdmin = false, hasUnreadMessages = false, hasUnreadNotifications = false }) {
   return (
     <div style={{ padding: '14px 16px 12px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
       <button onClick={onGoProfile} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -16,6 +16,13 @@ export default function HomeHeader({ userName, onGoProfile, onGoMessages, onGoNo
       </button>
 
       <div style={{ display: 'flex', gap: 10 }}>
+        {isAdmin && (
+          <button onClick={onGoDashboard} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, width: 20, height: 20, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.8">
+              <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+            </svg>
+          </button>
+        )}
         <button onClick={onGoMessages} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 0, position: 'relative', width: 20, height: 20 }}>
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" strokeWidth="1.8">
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
