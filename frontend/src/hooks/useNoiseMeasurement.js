@@ -10,6 +10,7 @@ export function useNoiseMeasurement() {
   const rafIdRef = useRef(null)
   const intervalRef = useRef(null)
   const samplesRef = useRef([])
+  const lastDisplayRef = useRef(0)
 
   const stop = useCallback(() => {
     cancelAnimationFrame(rafIdRef.current)
@@ -49,7 +50,11 @@ export function useNoiseMeasurement() {
           // 94dBSPL 기준 보정 (브라우저 마이크 정규화된 신호 기준)
           const currentDb = rms > 0 ? 20 * Math.log10(rms) + 94 : 0
           samplesRef.current.push(currentDb)
-          setDb(Math.round(currentDb))
+          const now = performance.now()
+          if (now - lastDisplayRef.current >= 1000) {
+            lastDisplayRef.current = now
+            setDb(Math.round(currentDb))
+          }
           rafIdRef.current = requestAnimationFrame(sample)
         }
         sample()
