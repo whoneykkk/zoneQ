@@ -14,6 +14,7 @@ import ComposePage from './pages/messages/ComposePage'
 import NoticesPage from './pages/notices/NoticesPage'
 import NoticeDetailPage from './pages/notices/NoticeDetailPage'
 import NotificationsPage from './pages/notifications/NotificationsPage'
+import DashboardPage from './pages/dashboard/DashboardPage'
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 30_000 } },
@@ -32,6 +33,12 @@ const router = createBrowserRouter([
       { path: '/notices', element: <NoticesPage /> },
       { path: '/notices/:id', element: <NoticeDetailPage /> },
       { path: '/notifications', element: <NotificationsPage /> },
+    ],
+  },
+  {
+    element: <PrivateRoute adminOnly />,
+    children: [
+      { path: '/dashboard', element: <DashboardPage /> },
     ],
   },
   { path: '*', element: <Navigate to="/" replace /> },
